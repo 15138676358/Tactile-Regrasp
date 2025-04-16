@@ -12,7 +12,7 @@ def test_cylin_and_rect():
     To test the tangential vector field, use T_field to calculate the K matrix.
     """
     Ks, ss = [], []
-    for i in range(10):
+    for i in range(0,10):
         # Load the data from the .npy files
         P_field = np.load(f'./temp_data/single_finger/pivoting/P_field_{i*10}mm.npy')
         F_field = np.load(f'./temp_data/single_finger/pivoting/F_field_{i*10}mm.npy')
@@ -23,7 +23,13 @@ def test_cylin_and_rect():
         T_field = core.calculate_tangential(N_field, F_field)
         K1, s1 = core.fit_K(N_field, F_mask, save_img=False)
         K2, s2 = core.fit_K(N_field, F_mask, save_img=False)
-        # K2[0, 1], K2[1, 0], s2[1] = -K2[0, 1], -K2[1, 0], -s2[1]  # use this row for cylinder
+        # # for rectangle
+        # s1, s2 = np.array([s1[0], s1[1], s1[2] - 1]), np.array([s2[0], s2[1], s2[2] - 1])
+        # # for cylinder
+        # K2[0, 1], K2[1, 0], s1, s2 = -K2[0, 1], -K2[1, 0], np.array([s1[0], s1[1], s1[2] - 1]), np.array([s2[0], -s2[1], s2[2] - 1])
+        # for pivoting
+        K1, K2 = K1[:2, :], K2[:2, :]
+        K2[0, 1], K2[1, 0], s1, s2 = -K2[0, 1], -K2[1, 0], np.array([s1[0] - 1, s1[1]]), np.array([s2[0] - 1, -s2[1]])
 
         J_1, J_2 = core.calculate_Jacobi(d=20)
         w = core.calculate_weight(d=20)
@@ -31,8 +37,8 @@ def test_cylin_and_rect():
         Ks.append(delta_u)
         ss.append(s1)
 
-    plt.plot(ss)
-    # plt.legend(['δy', 'δz', 'δθy', 'δθz'])
+    plt.plot(Ks)
+    plt.legend(['δy', 'δz', 'δθy', 'δθz'])
     plt.show()
 
 def test_pivot():

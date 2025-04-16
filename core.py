@@ -82,28 +82,35 @@ def fit_K(N_field, F_mask, save_img=False):
     fit_input = np.column_stack((X.reshape(-1), Y.reshape(-1), np.ones_like(X.reshape(-1))))
     coeffx, residualx, _, _  = np.linalg.lstsq(fit_input, Nx.reshape(-1), rcond=None)
     coeffy, residualy, _, _  = np.linalg.lstsq(fit_input, Ny.reshape(-1), rcond=None)
-    sx, sy = np.mean(Nx), np.mean(Ny)
+    coeffz, residualz, _, _  = np.linalg.lstsq(fit_input, Nz.reshape(-1), rcond=None)
+    sx, sy, sz = np.mean(Nx), np.mean(Ny), np.mean(Nz)
     
     if save_img == True:
         fig = plt.figure(figsize=(10, 6))
         surfx, surfy = np.meshgrid(range(X.min() - 2, X.max() + 2), range(Y.min() - 2, Y.max() + 2))
         
         surfz = coeffx[0] * surfx + coeffx[1] * surfy + coeffx[2]
-        ax = fig.add_subplot(121, projection='3d')
+        ax = fig.add_subplot(131, projection='3d')
         ax.scatter(X, Y, Nx, c=Nx, cmap='viridis', alpha=0.8)
         ax.plot_surface(surfx, surfy, surfz, alpha=0.3, color='r')
         ax.set_title(f's^x: {sx:.2f} \n coeff*100: {[round(c*100, 2) for c in coeffx]} \n residual*100: {residualx[0]*100:.2f}', fontsize=12)
         
         surfz = coeffy[0] * surfx + coeffy[1] * surfy + coeffy[2]
-        ax = fig.add_subplot(122, projection='3d')
+        ax = fig.add_subplot(132, projection='3d')
         ax.scatter(X, Y, Ny, c=Ny, cmap='viridis', alpha=0.8)
         ax.plot_surface(surfx, surfy, surfz, alpha=0.3, color='r')
         ax.set_title(f's^y: {sy:.2f} \n coeff*100: {[round(c*100, 2) for c in coeffy]} \n residual*100: {residualy[0]*100:.2f}', fontsize=12)
+
+        surfz = coeffz[0] * surfx + coeffz[1] * surfy + coeffz[2]
+        ax = fig.add_subplot(133, projection='3d')
+        ax.scatter(X, Y, Nz, c=Nz, cmap='viridis', alpha=0.8)
+        ax.plot_surface(surfx, surfy, surfz, alpha=0.3, color='r')
+        ax.set_title(f's^z: {sz:.2f} \n coeff*100: {[round(c*100, 2) for c in coeffz]} \n residual*100: {residualz[0]*100:.2f}', fontsize=12)
         
         plt.savefig('fit_image.png')
         plt.close()
 
-    return np.array([[coeffx[0], coeffx[1], 0, 1], [coeffy[0], coeffy[1], -1, 0]]), np.array([sx, sy])
+    return np.array([[coeffx[0], coeffx[1], 0, -1], [coeffy[0], coeffy[1], 1, 0], [coeffz[0], coeffz[1], 0, 0]]), np.array([sx, sy, sz])
 
 def calculate_Jacobi(d):
     """
@@ -141,7 +148,7 @@ def optimize_motion(K_1, K_2, J_1, J_2, s_1, s_2, w):
     """
     KJ_1, KJ_2 = K_1 @ J_1, K_2 @ J_2
     A = KJ_1.T @ KJ_1 + KJ_2.T @ KJ_2 + w.T @ w
-    b = KJ_1.T @ s_1 + KJ_2.T @ s_2
+    b = -KJ_1.T @ s_1 - KJ_2.T @ s_2
     delta_u = np.linalg.solve(A, b)
 
     return delta_u
