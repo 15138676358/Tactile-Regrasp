@@ -51,6 +51,20 @@ def calculate_normal(P_field):
 
     return N_field
 
+def calculate_tangential(N_field, F_field):
+    """Calculate the tangential vector from normal and force vectors.
+    Args: 
+        N_field (np.ndarray): Normal vector field. 
+        F_field (np.ndarray): Force field.
+    Returns: 
+        Tangential vector field.
+    """
+    Fn_field = np.sum(N_field * F_field, axis=1)[:, np.newaxis] * N_field
+    Ft_field = F_field - Fn_field
+    T_field = Ft_field / np.linalg.norm(Ft_field, axis=1)[:, np.newaxis]
+    
+    return T_field
+
 def fit_K(N_field, F_mask, save_img=False):
     """
     Fits the tactile vector field to a plane using least squares method.
@@ -66,8 +80,8 @@ def fit_K(N_field, F_mask, save_img=False):
     Nx, Ny, Nz, F_mask = N_field[:, 0].reshape(20, 20), N_field[:, 1].reshape(20, 20), N_field[:, 2].reshape(20, 20), F_mask.reshape(20, 20)
     X, Y, Nx, Ny, Nz = X[F_mask], Y[F_mask], Nx[F_mask], Ny[F_mask], Nz[F_mask]
     fit_input = np.column_stack((X.reshape(-1), Y.reshape(-1), np.ones_like(X.reshape(-1))))
-    coeffx = np.linalg.lstsq(fit_input, Nx.reshape(-1), rcond=None)[0]
-    coeffy = np.linalg.lstsq(fit_input, Ny.reshape(-1), rcond=None)[0]
+    coeffx, residualx, _, _  = np.linalg.lstsq(fit_input, Nx.reshape(-1), rcond=None)
+    coeffy, residualy, _, _  = np.linalg.lstsq(fit_input, Ny.reshape(-1), rcond=None)
     sx, sy = np.mean(Nx), np.mean(Ny)
     
     if save_img == True:
@@ -78,13 +92,13 @@ def fit_K(N_field, F_mask, save_img=False):
         ax = fig.add_subplot(121, projection='3d')
         ax.scatter(X, Y, Nx, c=Nx, cmap='viridis', alpha=0.8)
         ax.plot_surface(surfx, surfy, surfz, alpha=0.3, color='r')
-        ax.set_title(f's^x: {sx}')
+        ax.set_title(f's^x: {sx:.2f} \n coeff*100: {[round(c*100, 2) for c in coeffx]} \n residual*100: {residualx[0]*100:.2f}', fontsize=12)
         
         surfz = coeffy[0] * surfx + coeffy[1] * surfy + coeffy[2]
         ax = fig.add_subplot(122, projection='3d')
         ax.scatter(X, Y, Ny, c=Ny, cmap='viridis', alpha=0.8)
         ax.plot_surface(surfx, surfy, surfz, alpha=0.3, color='r')
-        ax.set_title(f's^y: {sy}')
+        ax.set_title(f's^y: {sy:.2f} \n coeff*100: {[round(c*100, 2) for c in coeffy]} \n residual*100: {residualy[0]*100:.2f}', fontsize=12)
         
         plt.savefig('fit_image.png')
         plt.close()
