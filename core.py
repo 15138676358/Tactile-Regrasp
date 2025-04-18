@@ -135,7 +135,7 @@ def calculate_weight(d):
     """
     return np.array([[1, 0, 0, 0], [0, 1, 0, 0] ,[0, 0, d, 0] ,[0, 0, 0, d]])
 
-def optimize_motion(K_1, K_2, J_1, J_2, s_1, s_2, w):
+def optimize_motion(K1, K2, J1, J2, s1, s2, w):
     """
     Optimizes the motion of the fingers using the Jacobian matrices and the tactile field data by solving the linear problem.
     Args:
@@ -146,9 +146,9 @@ def optimize_motion(K_1, K_2, J_1, J_2, s_1, s_2, w):
     Returns:
         delta_u (np.ndarray): The optimized motion of the fingers.
     """
-    KJ_1, KJ_2 = K_1 @ J_1, K_2 @ J_2
-    A = KJ_1.T @ KJ_1 + KJ_2.T @ KJ_2 + w.T @ w
-    b = -KJ_1.T @ s_1 - KJ_2.T @ s_2
+    KJ1, KJ2 = K1 @ J1, K2 @ J2
+    A = KJ1.T @ KJ1 + KJ2.T @ KJ2 + w.T @ w
+    b = -(KJ1.T @ s1 + KJ2.T @ s2)
     delta_u = np.linalg.solve(A, b)
 
     return delta_u

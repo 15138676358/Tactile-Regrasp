@@ -21,24 +21,29 @@ def test_cylin_and_rect():
         F_mask = np.linalg.norm(F_field, axis=1) > 0.04
         N_field = core.calculate_normal(P_field)
         T_field = core.calculate_tangential(N_field, F_field)
-        K1, s1 = core.fit_K(N_field, F_mask, save_img=False)
-        K2, s2 = core.fit_K(N_field, F_mask, save_img=False)
+        Kn1, sn1 = core.fit_K(N_field, F_mask, save_img=False)
+        Kt1, st1 = core.fit_K(T_field, F_mask, save_img=False)
+        Kn2, sn2 = core.fit_K(N_field, F_mask, save_img=False)
+        Kt2, st2 = core.fit_K(T_field, F_mask, save_img=False)
+        ss.append(sn1)
         # # for rectangle
-        # s1, s2 = np.array([s1[0], s1[1], s1[2] - 1]), np.array([s2[0], s2[1], s2[2] - 1])
+        # K1, K2 = Kn1, Kn2
+        # s1, s2 = np.array([sn1[0], sn1[1], sn1[2] - 1]), np.array([sn2[0], sn2[1], sn2[2] - 1])
         # # for cylinder
-        # K2[0, 1], K2[1, 0], s1, s2 = -K2[0, 1], -K2[1, 0], np.array([s1[0], s1[1], s1[2] - 1]), np.array([s2[0], -s2[1], s2[2] - 1])
+        # K1, K2 = Kn1, Kn2
+        # K2[0, 1], K2[1, 0], s1, s2 = -K2[0, 1], -K2[1, 0], np.array([sn1[0], sn1[1], sn1[2] - 1]), np.array([sn2[0], -sn2[1], sn2[2] - 1])
         # for pivoting
-        K1, K2 = K1[:2, :], K2[:2, :]
-        K2[0, 1], K2[1, 0], s1, s2 = -K2[0, 1], -K2[1, 0], np.array([s1[0] - 1, s1[1]]), np.array([s2[0] - 1, -s2[1]])
+        K1, K2 = Kt1, Kt2
+        K2[0, 1], K2[1, 0], s1, s2 = -K2[0, 1], -K2[1, 0], np.array([st1[0] - 1, st1[1], st1[2]]), np.array([st2[0] - 1, -st2[1], st2[2]])
 
-        J_1, J_2 = core.calculate_Jacobi(d=20)
+        J1, J2 = core.calculate_Jacobi(d=20)
         w = core.calculate_weight(d=20)
-        delta_u = core.optimize_motion(K1, K2, J_1, J_2, s1, s2, 0.01*w)
+        delta_u = core.optimize_motion(K1, K2, J1, J2, s1, s2, 0.1*w)
         Ks.append(delta_u)
-        ss.append(s1)
+
 
     plt.plot(Ks)
-    plt.legend(['δy', 'δz', 'δθy', 'δθz'])
+    plt.legend(['δyt', 'δzt', 'δθyt', 'δθzt'])
     plt.show()
 
 def test_pivot():
