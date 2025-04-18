@@ -1,4 +1,4 @@
-import core
+import function
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -19,12 +19,12 @@ def test_cylin_and_rect():
 
         # Calculate scores
         F_mask = np.linalg.norm(F_field, axis=1) > 0.04
-        N_field = core.calculate_normal(P_field)
-        T_field = core.calculate_tangential(N_field, F_field)
-        Kn1, sn1 = core.fit_K(N_field, F_mask, save_img=False)
-        Kt1, st1 = core.fit_K(T_field, F_mask, save_img=False)
-        Kn2, sn2 = core.fit_K(N_field, F_mask, save_img=False)
-        Kt2, st2 = core.fit_K(T_field, F_mask, save_img=False)
+        N_field = function.calculate_normal(P_field)
+        T_field = function.calculate_tangential(N_field, F_field)
+        Kn1, sn1 = function.fit_K(N_field, F_mask, save_img=False)
+        Kt1, st1 = function.fit_K(T_field, F_mask, save_img=False)
+        Kn2, sn2 = function.fit_K(N_field, F_mask, save_img=False)
+        Kt2, st2 = function.fit_K(T_field, F_mask, save_img=False)
         ss.append(sn1)
         # # for rectangle
         # K1, K2 = Kn1, Kn2
@@ -36,9 +36,9 @@ def test_cylin_and_rect():
         K1, K2 = Kt1, Kt2
         K2[0, 1], K2[1, 0], s1, s2 = -K2[0, 1], -K2[1, 0], np.array([st1[0] - 1, st1[1], st1[2]]), np.array([st2[0] - 1, -st2[1], st2[2]])
 
-        J1, J2 = core.calculate_Jacobi(d=20)
-        w = core.calculate_weight(d=20)
-        delta_u = core.optimize_motion(K1, K2, J1, J2, s1, s2, 0.1*w)
+        J1, J2 = function.calculate_Jacobi(d=20)
+        w = function.calculate_weight(d=20)
+        delta_u = function.optimize_motion(K1, K2, J1, J2, s1, s2, 0.1*w)
         Ks.append(delta_u)
 
 
@@ -58,17 +58,17 @@ def test_pivot():
 
         # Calculate scores
         F_mask = np.linalg.norm(F_field, axis=1) > 0.04
-        N_field = core.calculate_normal(P_field)
-        T_field = core.calculate_tangential(N_field, F_field)
-        Kn1, sn1 = core.fit_K(N_field, F_mask, save_img=False)
-        Kt1, st1 = core.fit_K(T_field, F_mask, save_img=False)
-        Kn2, sn2 = core.fit_K(N_field, F_mask, save_img=False)
-        Kt2, st2 = core.fit_K(T_field, F_mask, save_img=False)
+        N_field = function.calculate_normal(P_field)
+        T_field = function.calculate_tangential(N_field, F_field)
+        Kn1, sn1 = function.fit_K(N_field, F_mask, save_img=False)
+        Kt1, st1 = function.fit_K(T_field, F_mask, save_img=False)
+        Kn2, sn2 = function.fit_K(N_field, F_mask, save_img=False)
+        Kt2, st2 = function.fit_K(T_field, F_mask, save_img=False)
 
-        J_1, J_2 = core.calculate_Jacobi(d=20)
-        w = core.calculate_weight(d=20)
-        delta_un = core.optimize_motion(Kn1, Kn2, J_1, J_2, sn1, sn2, 0.01*w)
-        delta_ut = core.optimize_motion(Kt1, Kt2, J_1, J_2, st1, st2, 0.01*w)
+        J_1, J_2 = function.calculate_Jacobi(d=20)
+        w = function.calculate_weight(d=20)
+        delta_un = function.optimize_motion(Kn1, Kn2, J_1, J_2, sn1, sn2, 0.01*w)
+        delta_ut = function.optimize_motion(Kt1, Kt2, J_1, J_2, st1, st2, 0.01*w)
         delta_u = 0.9 * delta_un + 0.1 * delta_ut
         Ks.append(delta_u)
         ss.append(sn1)
