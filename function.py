@@ -29,7 +29,7 @@ def draw_tactile(F_field, F_mask):
     plt.quiver(X, Y, Fx * F_mask, Fy * F_mask, Fz * F_mask, cmap='Blues', pivot='tail', scale=10, width=0.005, headwidth=4, headlength=6, headaxislength=4)
     plt.axis('equal')
     plt.colorbar()
-    plt.savefig('tactile_image.png')
+    plt.savefig('image/tactile_image.png')
     plt.close()
 
 def calculate_normal(P_field):
@@ -107,7 +107,7 @@ def fit_K(N_field, F_mask, save_img=False):
         ax.plot_surface(surfx, surfy, surfz, alpha=0.3, color='r')
         ax.set_title(f's^z: {sz:.2f} \n coeff*100: {[round(c*100, 2) for c in coeffz]} \n residual*100: {residualz[0]*100:.2f}', fontsize=12)
         
-        plt.savefig('fit_image.png')
+        plt.savefig('image/fit_image.png')
         plt.close()
 
     return np.array([[coeffx[0], coeffx[1], 0, -1], [coeffy[0], coeffy[1], 1, 0], [coeffz[0], coeffz[1], 0, 0]]), np.array([sx, sy, sz])
