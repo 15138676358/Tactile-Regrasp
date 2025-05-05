@@ -26,7 +26,7 @@ def draw_tactile(F_field, F_mask):
     """
     X, Y = np.meshgrid(np.arange(20), np.arange(20))
     Fx, Fy, Fz, F_mask = F_field[:, 0].reshape(20, 20), F_field[:, 1].reshape(20, 20), F_field[:, 2].reshape(20, 20), F_mask.reshape(20, 20)
-    plt.quiver(X, Y, Fx * F_mask, Fy * F_mask, Fz * F_mask, cmap='Blues', pivot='tail', scale=10, width=0.005, headwidth=4, headlength=6, headaxislength=4)
+    plt.quiver(X, Y, Fx * F_mask, Fy * F_mask, Fz * F_mask, cmap='Blues', pivot='tail', scale=1, width=0.005, headwidth=4, headlength=6, headaxislength=4)
     plt.axis('equal')
     plt.colorbar()
     plt.savefig('image/tactile_image.png')
