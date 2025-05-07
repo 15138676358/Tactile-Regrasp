@@ -12,32 +12,32 @@ def test_single_finger():
     To test the tangential vector field, use T_field to calculate the K matrix.
     """
     Ks, ss = [], []
-    for i in range(5,10):
+    for i in range(4,10):
         # Load the data from the .npy files
-        P_field = np.load(f'./temp_data/single_finger/cylinder/P_field_{i*2}mm.npy')
-        F_field = np.load(f'./temp_data/single_finger/cylinder/F_field_{i*2}mm.npy')
+        P_field = np.load(f'./temp_data/single_finger/pivoting/P_field_{i*10}mm.npy')
+        F_field = np.load(f'./temp_data/single_finger/pivoting/F_field_{i*10}mm.npy')
 
         # Calculate scores
         F_mask = np.linalg.norm(F_field, axis=1) > 0.04
         N_field = function.calculate_normal(P_field)
         T_field = function.calculate_tangential(N_field, F_field)
-        W_field = F_field / np.linalg.norm(F_field, axis=1)[:, np.newaxis]
+        W_field = -F_field / np.linalg.norm(F_field, axis=1)[:, np.newaxis]
         dot = np.sum(N_field[F_mask] * W_field[F_mask], axis=1)
         
-        Kn1, sn1 = function.fit_K(N_field, F_mask, save_img=False)
-        Kt1, st1 = function.fit_K(T_field, F_mask, save_img=False)
-        Kn2, sn2 = function.fit_K(N_field, F_mask, save_img=False)
-        Kt2, st2 = function.fit_K(T_field, F_mask, save_img=False)
+        Kn1, sn1 = function.fit_K(W_field, F_mask, save_img=False)
+        Kt1, st1 = function.fit_K(W_field, F_mask, save_img=False)
+        Kn2, sn2 = function.fit_K(W_field, F_mask, save_img=False)
+        Kt2, st2 = function.fit_K(W_field, F_mask, save_img=False)
         ss.append(sn1)
-        # for rectangle
-        K1, K2 = Kn1, Kn2
-        s1, s2 = np.array([sn1[0], sn1[1], sn1[2] - 1]), np.array([sn2[0], sn2[1], sn2[2] - 1])
+        # # for rectangle
+        # K1, K2 = Kn1, Kn2
+        # s1, s2 = np.array([sn1[0], sn1[1], sn1[2] - 1]), np.array([sn2[0], sn2[1], sn2[2] - 1])
         # # for cylinder
         # K1, K2 = Kn1, Kn2
         # K2[0, 1], K2[1, 0], s1, s2 = -K2[0, 1], -K2[1, 0], np.array([sn1[0], sn1[1], sn1[2] - 1]), np.array([sn2[0], -sn2[1], sn2[2] - 1])
-        # # for pivoting
-        # K1, K2 = Kt1, Kt2
-        # K2[0, 1], K2[1, 0], s1, s2 = -K2[0, 1], -K2[1, 0], np.array([st1[0] - 1, st1[1], st1[2]]), np.array([st2[0] - 1, -st2[1], st2[2]])
+        # for pivoting
+        K1, K2 = Kt1, Kt2
+        K2[0, 1], K2[1, 0], s1, s2 = -K2[0, 1], -K2[1, 0], np.array([st1[0] - 0.707, st1[1], st1[2]-0.707]), np.array([st2[0] - 0.707, -st2[1], st2[2]-0.707])
 
         J1, J2 = function.calculate_Jacobi(d=20)
         w = function.calculate_weight(d=20)
