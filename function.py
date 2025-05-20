@@ -26,11 +26,34 @@ def draw_tactile(F_field, F_mask):
     """
     X, Y = np.meshgrid(np.arange(20), np.arange(20))
     Fx, Fy, Fz, F_mask = F_field[:, 0].reshape(20, 20), F_field[:, 1].reshape(20, 20), F_field[:, 2].reshape(20, 20), F_mask.reshape(20, 20)
-    plt.quiver(X, Y, Fx * F_mask, Fy * F_mask, Fz * F_mask, cmap='Blues', pivot='tail', scale=1, width=0.005, headwidth=4, headlength=6, headaxislength=4)
+    plt.quiver(X, Y, Fx * F_mask, Fy * F_mask, Fz * F_mask, cmap='coolwarm', pivot='tail', scale=1, width=0.005, headwidth=4, headlength=6, headaxislength=4)
     plt.axis('equal')
     plt.colorbar()
     plt.savefig('image/tactile_image.png')
     plt.close()
+
+def correct_force(F_field):
+    """
+    Corrects the force field by considering the surface shape of tactile sensor.
+    Args:
+        F_field (np.ndarray): The tactile field data.
+    Returns:
+        F_field (np.ndarray): The corrected tactile field data.
+    """
+    F_field_corrected = F_field.copy()
+    for i in range(400):
+        f = F_field[i]
+        if np.linalg.norm(f) > 0.02:
+            dx, dy = i % 20 - 10, i // 20 - 10
+            t = np.array([-dy, dx, 0]) / np.sqrt(dx ** 2 + dy ** 2 + 1e-6)
+            sin = -np.sqrt(dx ** 2 + dy ** 2 + 1e-6) / 35
+            cos = np.sqrt(1 - sin ** 2)
+            f_parallel = np.dot(f, t) * t
+            f_vertical = f - f_parallel
+            f_corrected = f_parallel + cos * f_vertical + sin * np.cross(t, f_vertical)
+            F_field_corrected[i] = f_corrected
+
+    return F_field_corrected
 
 def calculate_normal(P_field):
     """
